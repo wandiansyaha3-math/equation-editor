@@ -60,6 +60,17 @@
         .btn-primary { background: var(--office-blue); color: white; border: none; }
         .btn-success { background: #059669; color: white; border: none; }
         .btn-danger { color: #dc2626; border-color: #fca5a5; }
+
+        /* Warna hijau emerald untuk tombol CBT */
+        .btn-cbt {
+            background-color: #27ae60 !important;
+            color: white !important;
+            border: none;
+        }
+
+        .btn-cbt:hover {
+            background-color: #219150 !important;
+        }
     </style>
 </head>
 <body>
@@ -353,18 +364,23 @@
         <div style="flex-grow:1"></div>
         <button class="btn btn-primary" onclick="downloadImage()"> Simpan PNG</button>
         <button class="btn btn-success" onclick="copyToClipboard()">SALIN </button>
+        <button class="btn btn-cbt" onclick="copyToCBT()"> <i class="fas fa-desktop"></i> Copy for CBT
+
+
+</button>
+</button>
     </div>
 </div>
 
 <script>
-    // 1. Deklarasi Variabel Global
+    // Deklarasi Variabel Global
     const input = document.getElementById('latexInput');
     const display = document.getElementById('math-display');
     const captureArea = document.getElementById('math-capture-area');
     const fSize = document.getElementById('fontSizeSelect');
     let activeColor = "#000000"; // Default warna hitam
 
-    // 2. Inisialisasi Saat Halaman Dimuat
+    // Inisialisasi Saat Halaman Dimuat
     window.onload = function() {
         // Render ikon-ikon di menu toolbar
         document.querySelectorAll('[data-math]').forEach(el => {
@@ -375,7 +391,7 @@
         render();
     };
 
-    // 3. Logika Warna (Grid Kotak)
+    // Logika Warna (Grid Kotak)
     function setColor(hex) {
         activeColor = hex;
         const preview = document.getElementById('currentColorPreview');
@@ -383,7 +399,7 @@
         render(); 
     }
 
-    // 4. Fungsi Render Utama (Presisi 1:1)
+    // Fungsi Render Utama 
     function render() {
         if (!display || !input || !fSize) return;
         
@@ -396,17 +412,17 @@
             return;
         }
         
-        // displayMode: false penting agar tidak ada margin tambahan di Word
+      
         katex.render(val, display, { throwOnError: false, displayMode: false });
     }
 
-    // 5. Fungsi Manipulasi Teks
+    
     function insert(code) {
         const start = input.selectionStart;
         const end = input.selectionEnd;
         input.value = input.value.slice(0, start) + code + input.value.slice(end);
         input.focus();
-        // Mengatur kursor ke dalam kurung kurawal jika ada
+        
         const cursorOffset = code.indexOf('{}') !== -1 ? code.indexOf('{}') + 1 : code.length;
         input.setSelectionRange(start + cursorOffset, start + cursorOffset);
         render();
@@ -419,14 +435,14 @@
         } 
     }
 
-    // 6. Fungsi Export (Copy & Download)
+    
     function copyLaTeX() { 
      if(!input.value) return alert("Rumus kosong!");
      navigator.clipboard.writeText(input.value); 
      alert("Kode LaTeX disalin!"); 
     }
 
-    // --- 1. FUNGSI PEMOTONG (WAJIB ADA) ---
+    
 function trimCanvas(canvas) {
     const ctx = canvas.getContext('2d');
     const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -456,12 +472,12 @@ function trimCanvas(canvas) {
     return trimmed;
 }
 
-// --- 2. FUNGSI SALIN UTAMA (VERSI TERBAIK) ---
+//FUNGSI SALIN UTAMA 
 async function copyToClipboard() {
     if (!input.value.trim()) return alert("Tulis rumus terlebih dahulu!");
     
     try {
-        // Capture resolusi tinggi agar tajam seperti hasil download
+        
         const canvas4x = await html2canvas(captureArea, { 
             backgroundColor: null, 
             scale: 4, 
@@ -503,17 +519,74 @@ async function copyToClipboard() {
     }
 }
         
-
+    //Fungsi Download
     function downloadImage() {
         if (!input.value.trim()) return;
-        // Scale 2 khusus download agar gambar tajam saat diprint
-        html2canvas(captureArea, { backgroundColor: null, scale: 4 }).then(canvas => {
+         html2canvas(captureArea, { backgroundColor: null, scale: 4 }).then(canvas => {
             const link = document.createElement('a');
             link.download = 'rumus-matematika.png';
             link.href = canvas.toDataURL();
             link.click();
         });
     }
+
+    //Fungsi Copy to CBT
+    async function copyToCBT() {
+    if (!input.value.trim()) return alert("Tulis rumus terlebih dahulu!");
+    
+    try {
+        // 1. Capture Resolusi Tinggi
+        const canvas4x = await html2canvas(captureArea, { 
+            backgroundColor: null, 
+            scale: 4, 
+            logging: false, 
+            useCORS: true 
+        });
+
+        const croppedHighRes = trimCanvas(canvas4x);
+
+        // 2. LOGIKA SKALA DINAMIS (Bagi 4)
+        const targetWidth = Math.round(croppedHighRes.width / 4);
+        const targetHeight = Math.round(croppedHighRes.height / 4);
+
+        // 3. Downsampling Fisik agar tidak raksasa di CBT
+        const finalCanvas = document.createElement('canvas');
+        finalCanvas.width = targetWidth;
+        finalCanvas.height = targetHeight;
+        const ctx = finalCanvas.getContext('2d');
+
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        
+        // Gambar dari resolusi 4x ke ukuran 1x secara fisik
+        ctx.drawImage(croppedHighRes, 0, 0, targetWidth, targetHeight);
+
+        const dataUrl = finalCanvas.toDataURL("image/png");
+
+        // 4. Format HTML untuk CBT
+        const htmlString = `<img src="${dataUrl}" width="${targetWidth}" height="${targetHeight}" style="height:${targetHeight}px; width:auto; vertical-align:middle; display:inline-block; margin:0 2px;" alt="math">`;
+        
+        const htmlBlob = new Blob([htmlString], { type: "text/html" });
+
+        // 5. Salin ke Clipboard
+        finalCanvas.toBlob(async (pngBlob) => {
+            try {
+                const item = new ClipboardItem({ 
+                    "text/html": htmlBlob,
+                    "image/png": pngBlob 
+                });
+                await navigator.clipboard.write([item]);
+                alert("Berhasil menyalin untuk CBT!");
+            } catch (err) {
+                alert("Gagal menyalin.");
+            }
+        }, "image/png", 1.0);
+        
+    } catch (err) { 
+        console.error(err);
+        alert("Gagal memproses gambar."); 
+    }
+}
 </script>
 </body>
 </html>
