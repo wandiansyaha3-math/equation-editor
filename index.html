@@ -326,6 +326,7 @@
             <div id="currentColorPreview" style="width: 20px; height: 20px; background: #000; border: 1px solid #999; border-radius: 2px;"></div>
             <span class="ribbon-label">Color ▾</span>
             <div class="submenu" style="grid-template-columns: repeat(3, 1fr); width: 100px; padding: 5px; gap: 4px;">
+            <div class="sub-item" onclick="setColor('#000000')" style="background:#000000; width:25px; height:25px; min-width:unset;"></div>
             <div class="sub-item" onclick="setColor('#ff0000')" style="background:#ff0000; width:25px; height:25px; min-width:unset;"></div>
             <div class="sub-item" onclick="setColor('#00ff00')" style="background:#00ff00; width:25px; height:25px; min-width:unset;"></div>
             <div class="sub-item" onclick="setColor('#0000ff')" style="background:#0000ff; width:25px; height:25px; min-width:unset;"></div>
@@ -590,4 +591,5 @@ async function copyToClipboard() {
 </script>
 </body>
 </html>
+
 
