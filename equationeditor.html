@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title> Persamaan Matematika</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+
+    <style>
+        :root { --office-blue: #2b579a; --bg-gray: #f8fafc; --border: #cbd5e1; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: #e2e8f0; padding: 15px; margin: 0; }
+        
+        .main-container { max-width: 1200px; margin: auto; background: white; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); overflow: hidden; }
+        .header { background: var(--office-blue); color: white; padding: 12px 20px; font-weight: bold; font-size: 14px; }
+
+        /* Toolbar Menu Utama (Equation Structures) */
+        .ribbon-toolbar { display: flex; background: var(--bg-gray); padding: 5px; border-bottom: 1px solid var(--border); gap: 2px; flex-wrap: wrap; }
+        .ribbon-group { position: relative; display: flex; flex-direction: column; align-items: center; padding: 8px 12px; min-width: 80px; cursor: pointer; border: 1px solid transparent; }
+        .ribbon-group:hover { background: #fff; border: 1px solid #bbb; border-radius: 4px; }
+        .ribbon-icon { height: 35px; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+        .ribbon-label { font-size: 11px; margin-top: 4px; color: #334155; font-weight: 600; }
+
+        /* Dropdown Submenu */
+        .submenu { 
+            display: none; position: absolute; top: 100%; left: 0; background: white; 
+            border: 1px solid #999; z-index: 1000; box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            padding: 10px; grid-template-columns: repeat(4, 1fr); gap: 8px; width: max-content;
+        }
+        .ribbon-group:hover .submenu { display: grid; }
+        .sub-item { border: 1px solid #eee; padding: 10px; display: flex; align-items: center; justify-content: center; min-width: 55px; height: 55px; background: #fff; border-radius: 4px; }
+        .sub-item:hover { border-color: var(--office-blue); background: #eef2ff; transform: scale(1.1); }
+
+        /* Settings & Info */
+        .settings-bar { display: flex; background: #fff; padding: 12px 20px; border-bottom: 1px solid #ddd; gap: 30px; align-items: center; }
+        .setting-item { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: bold; }
+
+        /* Editor Area */
+        .editor-body { padding: 20px; }
+        #latexInput { width: 100%; height: 100px; padding: 15px; border: 1px solid #ccc; border-radius: 6px; font-size: 18px; font-family: 'Consolas', monospace; resize: vertical; margin-bottom: 20px; }
+        
+        /* Preview Area - Dibuat Ultra Presisi */
+        #preview-box { width: 100%; min-height: 150px; border: 1px solid #bbb; background: #fdfdfd; display: flex; align-items: center; justify-content: center; padding: 10px; border-radius: 6px; }
+        
+        /* Container untuk Capture 1:1 */
+        #math-capture-area { 
+            display: inline-block; 
+            padding: 0 !important; 
+            margin: 0 !important; 
+            line-height: 1;
+            background: transparent;
+        }
+        #math-display { display: inline-block; padding: 0 !important; margin: 0 !important; }
+
+        /* Footer & Tombol */
+        .footer { padding: 15px 20px; background: #f1f5f9; display: flex; gap: 12px; border-top: 1px solid #ccc; align-items: center; }
+        .btn { padding: 10px 20px; border-radius: 6px; border: 1px solid #aaa; cursor: pointer; font-size: 13px; font-weight: bold; background: white; transition: 0.2s; }
+        .btn-primary { background: var(--office-blue); color: white; border: none; }
+        .btn-success { background: #059669; color: white; border: none; }
+        .btn-danger { color: #dc2626; border-color: #fca5a5; }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <div class="header">EDITOR PERSAMAAN MATEMATIKA <br> As-Syifa Boarding School</div>
+
+    <div class="ribbon-toolbar">
+         <div class="ribbon-group">
+            <div class="ribbon-icon" data-math="\sum_{i=1}^{n}"></div>
+            <span class="ribbon-label">Templates ▾</span>
+            
+           <div class="submenu" style="grid-template-columns: 1fr; width: 280px;">
+                <div class="sub-item" onclick="insert('\\begin{cases} ax + by = c \\\\ dx + ey = f \\end{cases}')">
+                    <div data-math="\begin{cases} ax+by=c \\ dx+ey=f \end{cases}"></div>
+                    <span style="font-size: 11px; color: #666; margin-left: 10px;">SPLDV</span>
+                </div>
+
+                <div class="sub-item" onclick="insert('x_{1,2} = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}')">
+                    <div data-math="x_{1,2} = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}"></div>
+                    <span style="font-size: 11px; color: #666; margin-left: 10px;">Rumus ABC</span>
+                </div>
+
+                <div class="sub-item" onclick="insert('\\bar{x} = \\frac{\\sum x_i}{n}')">
+                    <div data-math="\bar{x} = \frac{\sum x_i}{n}"></div>
+                    <span style="font-size: 11px; color: #666; margin-left: 10px;">Mean</span>
+                </div>
+
+                <div class="sub-item" onclick="insert('\\lim_{x \to a} f(x) = L')">
+                    <div data-math="\lim_{x \to a} f(x) = L"></div>
+                    <span style="font-size: 11px; color: #666; margin-left: 10px;">Limit</span>
+                </div>
+
+                <div class="sub-item" onclick="insert('\\int_{a}^{b} f(x) \\, dx')">
+                    <div data-math="\int_{a}^{b} f(x) \, dx"></div>
+                    <span style="font-size: 11px; color: #666; margin-left: 10px;">Integral Tentu</span>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="ribbon-group">
+            <div class="ribbon-icon" data-math="\frac{a}{b}"></div><span class="ribbon-label">Fraction ▾</span>
+            <div class="submenu">
+                <div class="sub-item" onclick="insert('\\frac{}{}')" data-math="\frac{a}{b}"></div>
+                <div class="sub-item" onclick="insert('^{}/_{}')" data-math="a/b"></div>
+                <div class="sub-item" onclick="insert('\\tfrac{}{}')" data-math="\small \frac{a}{b}"></div>
+            </div>
+        </div>
+
+        <div class="ribbon-group">
+            <div class="ribbon-icon" data-math="x^n"></div><span class="ribbon-label">Script ▾</span>
+            <div class="submenu">
+                <div class="sub-item" onclick="insert('^{}')" data-math="\square^n"></div>
+                <div class="sub-item" onclick="insert('_{}')" data-math="\square_n"></div>
+                <div class="sub-item" onclick="insert('_{}^{}')" data-math="\square_n^m"></div>
+            </div>
+        </div>
+
+        <div class="ribbon-group">
+            <div class="ribbon-icon" data-math="\sqrt{x}"></div><span class="ribbon-label">Akar ▾</span>
+            <div class="submenu" id="Bentuk Akar">
+                <div class="sub-item" onclick="insert('\\sqrt{}')" data-math="\sqrt{\square}"></div>
+                <div class="sub-item" onclick="insert('\\sqrt[{}]{}')" data-math="\sqrt[n]{\square}"></div>
+                <div class="sub-item" onclick="insert('\\sqrt[3]{}')" data-math="\sqrt[3]{}"></div>
+            </div>
+        </div>
+
+        <div class="ribbon-group">
+        <div class="ribbon-icon" data-math="\pm \neq \triangleq"></div><span class="ribbon-label">Operators ▾</span>
+            <div class="submenu" style="grid-template-columns: repeat(4, 1fr); width: 280px;">
+                <div class="sub-item" onclick="insert(': =')" data-math=":="></div>
+                <div class="sub-item" onclick="insert('= =')" data-math="=="></div>
+                <div class="sub-item" onclick="insert('+ =')" data-math="+="></div>
+                <div class="sub-item" onclick="insert('- =')" data-math="-="></div>
+                
+                <div class="sub-item" onclick="insert('\\stackrel{\\text{def}}{=}')" data-math="\stackrel{\text{def}}{=}"></div>
+                <div class="sub-item" onclick="insert('\\stackrel{m}{=}')" data-math="\stackrel{m}{=}"></div>
+                <div class="sub-item" onclick="insert('\\triangleq')" data-math="\triangleq"></div>
+                <div class="sub-item" onclick="insert('\\equiv')" data-math="\equiv"></div>
+
+                <div class="sub-item" onclick="insert('\\neq')" data-math="\neq"></div>
+                <div class="sub-item" onclick="insert('\\approx')" data-math="\approx"></div>
+                <div class="sub-item" onclick="insert('\\le')" data-math="\le"></div>
+                <div class="sub-item" onclick="insert('\\ge')" data-math="\ge"></div>
+            </div>
+        </div>
+    
+        <div class="ribbon-group">
+             <div class="ribbon-icon" data-math="\xrightarrow{\square}"></div><span class="ribbon-label">Operator Struktur▾</span>
+            <div class="submenu" style="grid-template-columns: repeat(4, 1fr); width: 320px;">
+            <div class="sub-item" onclick="insert('\\sum_{}^{}')" data-math="\sum"></div>
+            <div class="sub-item" onclick="insert('\\int_{}^{}')" data-math="\int"></div>
+            <div class="sub-item" onclick="insert('\\lim_{x \\to \\infty}')" data-math="\lim"></div>
+            <div class="sub-item" onclick="insert('\\prod_{}^{}')" data-math="\prod"></div>
+
+            <div class="sub-item" onclick="insert('\\xleftarrow{}')" data-math="\xleftarrow{\square}"></div>
+            <div class="sub-item" onclick="insert('\\xrightarrow{}')" data-math="\xrightarrow{\square}"></div>
+            <div class="sub-item" onclick="insert('\\xleftarrow[\\square]{}')" data-math="\xleftarrow[\square]{}"></div>
+            <div class="sub-item" onclick="insert('\\xrightarrow[\\square]{}')" data-math="\xrightarrow[\square]{}"></div>
+            
+            <div class="sub-item" onclick="insert('\\xLeftarrow{}')" data-math="\xLeftarrow{\square}"></div>
+            <div class="sub-item" onclick="insert('\\xRightarrow{}')" data-math="\xRightarrow{\square}"></div>
+            <div class="sub-item" onclick="insert('\\xLeftarrow[\\square]{}')" data-math="\xLeftarrow[\square]{}"></div>
+            <div class="sub-item" onclick="insert('\\xRightarrow[\\square]{}')" data-math="\xRightarrow[\square]{}"></div>
+
+            <div class="sub-item" onclick="insert('\\xleftrightarrow{}')" data-math="\xleftrightarrow{\square}"></div>
+            <div class="sub-item" onclick="insert('\\xleftrightarrow[\\square]{}')" data-math="\xleftrightarrow[\square]{}"></div>
+            <div class="sub-item" onclick="insert('\\xLeftrightarrow{}')" data-math="\xLeftrightarrow{\square}"></div>
+            <div class="sub-item" onclick="insert('\\xLeftrightarrow[\\square]{}')" data-math="\xLeftrightarrow[\square]{}"></div>
+        </div>
+    </div>
+        <div class="ribbon-group">
+         <div class="ribbon-icon" data-math="\alpha \beta \Gamma"></div><span class="ribbon-label">Greek ▾</span>
+        <div class="submenu" style="grid-template-columns: repeat(6, 1fr); width: 400px;">
+            <div class="sub-item" onclick="insert('\\alpha')" data-math="\alpha"></div>
+            <div class="sub-item" onclick="insert('\\beta')" data-math="\beta"></div>
+            <div class="sub-item" onclick="insert('\\gamma')" data-math="\gamma"></div>
+            <div class="sub-item" onclick="insert('\\delta')" data-math="\delta"></div>
+            <div class="sub-item" onclick="insert('\\epsilon')" data-math="\epsilon"></div>
+            <div class="sub-item" onclick="insert('\\zeta')" data-math="\zeta"></div>
+            <div class="sub-item" onclick="insert('\\eta')" data-math="\eta"></div>
+            <div class="sub-item" onclick="insert('\\theta')" data-math="\theta"></div>
+            <div class="sub-item" onclick="insert('\\iota')" data-math="\iota"></div>
+            <div class="sub-item" onclick="insert('\\kappa')" data-math="\kappa"></div>
+            <div class="sub-item" onclick="insert('\\lambda')" data-math="\lambda"></div>
+            <div class="sub-item" onclick="insert('\\mu')" data-math="\mu"></div>
+            <div class="sub-item" onclick="insert('\\nu')" data-math="\nu"></div>
+            <div class="sub-item" onclick="insert('\\xi')" data-math="\xi"></div>
+            <div class="sub-item" onclick="insert('\\pi')" data-math="\pi"></div>
+            <div class="sub-item" onclick="insert('\\rho')" data-math="\rho"></div>
+            <div class="sub-item" onclick="insert('\\sigma')" data-math="\sigma"></div>
+            <div class="sub-item" onclick="insert('\\tau')" data-math="\tau"></div>
+            <div class="sub-item" onclick="insert('\\upsilon')" data-math="\upsilon"></div>
+            <div class="sub-item" onclick="insert('\\phi')" data-math="\phi"></div>
+            <div class="sub-item" onclick="insert('\\chi')" data-math="\chi"></div>
+            <div class="sub-item" onclick="insert('\\psi')" data-math="\psi"></div>
+            <div class="sub-item" onclick="insert('\\omega')" data-math="\omega"></div>
+            <div class="sub-item" onclick="insert('\\varepsilon')" data-math="\varepsilon"></div>
+            
+            <div class="sub-item" onclick="insert('\\Gamma')" data-math="\Gamma"></div>
+            <div class="sub-item" onclick="insert('\\Delta')" data-math="\Delta"></div>
+            <div class="sub-item" onclick="insert('\\Theta')" data-math="\Theta"></div>
+            <div class="sub-item" onclick="insert('\\Lambda')" data-math="\Lambda"></div>
+            <div class="sub-item" onclick="insert('\\Xi')" data-math="\Xi"></div>
+            <div class="sub-item" onclick="insert('\\Pi')" data-math="\Pi"></div>
+            <div class="sub-item" onclick="insert('\\Sigma')" data-math="\Sigma"></div>
+            <div class="sub-item" onclick="insert('\\Phi')" data-math="\Phi"></div>
+            <div class="sub-item" onclick="insert('\\Psi')" data-math="\Psi"></div>
+            <div class="sub-item" onclick="insert('\\Omega')" data-math="\Omega"></div>
+        </div>
+    </div>
+
+    <div class="ribbon-group">
+    <div class="ribbon-icon" data-math="\subset \in \emptyset"></div><span class="ribbon-label">Operator Himpunan ▾</span>
+    <div class="submenu" style="grid-template-columns: repeat(4, 1fr); width: 280px;">
+        <div class="sub-item" onclick="insert('\\subset')" data-math="\subset"></div>
+        <div class="sub-item" onclick="insert('\\supset')" data-math="\supset"></div>
+        <div class="sub-item" onclick="insert('\\subseteq')" data-math="\subseteq"></div>
+        <div class="sub-item" onclick="insert('\\supseteq')" data-math="\supseteq"></div>
+        
+        <div class="sub-item" onclick="insert('\\not\\subset')" data-math="\not\subset"></div>
+        <div class="sub-item" onclick="insert('\\not\\supset')" data-math="\not\supset"></div>
+        <div class="sub-item" onclick="insert('\\not\\subseteq')" data-math="\not\subseteq"></div>
+        <div class="sub-item" onclick="insert('\\not\\supseteq')" data-math="\not\supseteq"></div>
+
+        <div class="sub-item" onclick="insert('\\in')" data-math="\in"></div>
+        <div class="sub-item" onclick="insert('\\ni')" data-math="\ni"></div>
+        <div class="sub-item" onclick="insert('\\notin')" data-math="\notin"></div>
+        <div class="sub-item" onclick="insert('\\emptyset')" data-math="\emptyset"></div>
+
+        <div class="sub-item" onclick="insert('\\sqsubset')" data-math="\sqsubset"></div>
+        <div class="sub-item" onclick="insert('\\sqsupset')" data-math="\sqsupset"></div>
+        <div class="sub-item" onclick="insert('\\sqsubseteq')" data-math="\sqsubseteq"></div>
+        <div class="sub-item" onclick="insert('\\sqsupseteq')" data-math="\sqsupseteq"></div>
+    </div>
+</div>
+
+    <div class="ribbon-group">
+    <div class="ribbon-icon" data-math="\leftrightarrow \Rightarrow"></div><span class="ribbon-label">Arrows ▾</span>
+        <div class="submenu" style="grid-template-columns: repeat(5, 1fr); width: 350px;">
+            <div class="sub-item" onclick="insert('\\leftarrow')" data-math="\leftarrow"></div>
+            <div class="sub-item" onclick="insert('\\rightarrow')" data-math="\rightarrow"></div>
+            <div class="sub-item" onclick="insert('\\uparrow')" data-math="\uparrow"></div>
+            <div class="sub-item" onclick="insert('\\downarrow')" data-math="\downarrow"></div>
+            <div class="sub-item" onclick="insert('\\leftrightarrow')" data-math="\leftrightarrow"></div>
+            
+            <div class="sub-item" onclick="insert('\\Leftarrow')" data-math="\Leftarrow"></div>
+            <div class="sub-item" onclick="insert('\\Rightarrow')" data-math="\Rightarrow"></div>
+            <div class="sub-item" onclick="insert('\\Uparrow')" data-math="\Uparrow"></div>
+            <div class="sub-item" onclick="insert('\\Downarrow')" data-math="\Downarrow"></div>
+            <div class="sub-item" onclick="insert('\\Leftrightarrow')" data-math="\Leftrightarrow"></div>
+
+            <div class="sub-item" onclick="insert('\\longleftarrow')" data-math="\longleftarrow"></div>
+            <div class="sub-item" onclick="insert('\\longrightarrow')" data-math="\longrightarrow"></div>
+            <div class="sub-item" onclick="insert('\\updownarrow')" data-math="\updownarrow"></div>
+            <div class="sub-item" onclick="insert('\\Updownarrow')" data-math="\Updownarrow"></div>
+            <div class="sub-item" onclick="insert('\\rightleftharpoons')" data-math="\rightleftharpoons"></div>
+
+            <div class="sub-item" onclick="insert('\\mapsto')" data-math="\mapsto"></div>
+            <div class="sub-item" onclick="insert('\\longmapsto')" data-math="\longmapsto"></div>
+            <div class="sub-item" onclick="insert('\\nearrow')" data-math="\nearrow"></div>
+            <div class="sub-item" onclick="insert('\\searrow')" data-math="\searrow"></div>
+            <div class="sub-item" onclick="insert('\\nwarrow')" data-math="\nwarrow"></div>
+        </div>
+    </div>
+
+        <div class="ribbon-group">
+            <div class="ribbon-icon" data-math="\begin{pmatrix} \cdot \end{pmatrix}"></div><span class="ribbon-label">Matrix ▾</span>
+            <div class="submenu">
+                <div class="sub-item" onclick="insert('\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}')" data-math="(2×2)"></div>
+                 <div class="sub-item" onclick="insert('\\begin{pmatrix} a & b & c \\\\ d & e & f \\end{pmatrix}')" data-math="(2×3)"></div>
+                  <div class="sub-item" onclick="insert('\\begin{pmatrix} a & b & c \\\\ d & e & f \\\\ g & h & i \\end{pmatrix}')" data-math="(3×3)"></div>
+                 <div class="sub-item" onclick="insert('\\begin{vmatrix} a & b \\\\ c & d \\end{vmatrix}')" data-math="|2×2| "></div>
+                 <div class="sub-item" onclick="insert('\\begin{bmatrix} a & b \\end{bmatrix}')" data-math="\begin{bmatrix} a & b \end{bmatrix}"></div>
+                 <div class="sub-item" onclick="insert('\\begin{bmatrix} a \\\\ b  \\end{bmatrix}')" data-math="\begin{bmatrix} a \\\\ b  \end{bmatrix}"></div>
+                 <div class="sub-item" onclick="insert('\\dots')" data-math="\dots"></div>
+                 <div class="sub-item" onclick="insert('\\cdots')" data-math="\cdots"></div>
+                 <div class="sub-item" onclick="insert('\\vdots')" data-math="\vdots"></div>
+                 <div class="sub-item" onclick="insert('\\ddots')" data-math="\ddots"></div>                 
+            </div>
+        </div>
+
+        <div class="ribbon-group">
+            <div class="ribbon-icon" data-math="\sin \log"></div><span class="ribbon-label">Function ▾</span>
+            <div class="submenu">
+                <div class="sub-item" onclick="insert('\\sin')" data-math="\sin"></div>
+                <div class="sub-item" onclick="insert('\\cos')" data-math="\cos"></div>
+                <div class="sub-item" onclick="insert('\\log')" data-math="\log"></div>
+                <div class="sub-item" onclick="insert('\\tan')" data-math="\tan"></div>
+                <div class="sub-item" onclick="insert('\\log')" data-math="\log"></div>
+                <div class="sub-item" onclick="insert('\\lim_{x \\to \\infty}')" data-math="\lim"></div>
+                <div class="sub-item" onclick="insert('\\ln')" data-math="\ln"></div>
+            </div>
+        </div>
+
+       
+    </div>
+
+    <div class="settings-bar">
+        <div class="setting-item">
+            Ukuran Font (Word): 
+            <select id="fontSizeSelect" onchange="render()">
+                <option value="10pt">10 pt </option>
+                <option value="11pt">11 pt </option>
+                <option value="12pt">12 pt </option>
+                <option value="14pt" selected>14 pt</option>
+                <option value="16pt">16 pt</option>
+                <option value="18pt">18 pt</option>
+            </select>
+        </div>
+        <div class="ribbon-group">
+            <div id="currentColorPreview" style="width: 20px; height: 20px; background: #000; border: 1px solid #999; border-radius: 2px;"></div>
+            <span class="ribbon-label">Color ▾</span>
+            <div class="submenu" style="grid-template-columns: repeat(3, 1fr); width: 100px; padding: 5px; gap: 4px;">
+            <div class="sub-item" onclick="setColor('#ff0000')" style="background:#ff0000; width:25px; height:25px; min-width:unset;"></div>
+            <div class="sub-item" onclick="setColor('#00ff00')" style="background:#00ff00; width:25px; height:25px; min-width:unset;"></div>
+            <div class="sub-item" onclick="setColor('#0000ff')" style="background:#0000ff; width:25px; height:25px; min-width:unset;"></div>
+            <div class="sub-item" onclick="setColor('#800000')" style="background:#800000; width:25px; height:25px; min-width:unset;"></div>
+            <div class="sub-item" onclick="setColor('#008000')" style="background:#008000; width:25px; height:25px; min-width:unset;"></div>
+            <div class="sub-item" onclick="setColor('#000080')" style="background:#000080; width:25px; height:25px; min-width:unset;"></div>
+            <div class="sub-item" onclick="setColor('#ffff00')" style="background:#ffff00; width:25px; height:25px; min-width:unset;"></div>
+            <div class="sub-item" onclick="setColor('#00ffff')" style="background:#00ffff; width:25px; height:25px; min-width:unset;"></div>
+            <div class="sub-item" onclick="setColor('#ff00ff')" style="background:#ff00ff; width:25px; height:25px; min-width:unset;"></div>
+            <div class="sub-item" onclick="setColor('#4d0000')" style="background:#4d0000; width:25px; height:25px; min-width:unset;"></div>
+            <div class="sub-item" onclick="setColor('#008080')" style="background:#008080; width:25px; height:25px; min-width:unset;"></div>
+            <div class="sub-item" onclick="setColor('#800080')" style="background:#800080; width:25px; height:25px; min-width:unset;"></div>
+            <div class="sub-item" onclick="setColor('#ff8000')" style="background:#ff8000; width:25px; height:25px; min-width:unset;"></div>
+            <div class="sub-item" onclick="setColor('#00c0a0')" style="background:#00c0a0; width:25px; height:25px; min-width:unset;"></div>
+            <div class="sub-item" onclick="setColor('#a000f0')" style="background:#a000f0; width:25px; height:25px; min-width:unset;"></div>
+            <div class="sub-item" onclick="setColor('#c04000')" style="background:#c04000; width:25px; height:25px; min-width:unset;"></div>
+            <div class="sub-item" onclick="setColor('#a08000')" style="background:#a08000; width:25px; height:25px; min-width:unset;"></div>
+            <div class="sub-item" onclick="setColor('#ff4080')" style="background:#ff4080; width:25px; height:25px; min-width:unset;"></div>
+            </div>
+        </div> 
+                
+    </div> 
+
+    <div class="editor-body">
+        <textarea id="latexInput" placeholder="Ketik rumus di sini atau klik menu di atas..." oninput="render()"></textarea>
+        <div id="preview-box">
+            <div id="math-capture-area">
+                <div id="math-display"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <button class="btn" onclick="copyLaTeX()">Salin LaTeX</button>
+        <button class="btn btn-danger" onclick="clearAll()"> Hapus Semua</button>
+        <div style="flex-grow:1"></div>
+        <button class="btn btn-primary" onclick="downloadImage()"> Simpan PNG</button>
+        <button class="btn btn-success" onclick="copyToClipboard()">SALIN </button>
+    </div>
+</div>
+
+<script>
+    // 1. Deklarasi Variabel Global
+    const input = document.getElementById('latexInput');
+    const display = document.getElementById('math-display');
+    const captureArea = document.getElementById('math-capture-area');
+    const fSize = document.getElementById('fontSizeSelect');
+    let activeColor = "#000000"; // Default warna hitam
+
+    // 2. Inisialisasi Saat Halaman Dimuat
+    window.onload = function() {
+        // Render ikon-ikon di menu toolbar
+        document.querySelectorAll('[data-math]').forEach(el => {
+            katex.render(el.getAttribute('data-math'), el, { throwOnError: false });
+        });
+        // Pastikan input awal kosong dan preview bersih
+        input.value = ""; 
+        render();
+    };
+
+    // 3. Logika Warna (Grid Kotak)
+    function setColor(hex) {
+        activeColor = hex;
+        const preview = document.getElementById('currentColorPreview');
+        if(preview) preview.style.background = hex;
+        render(); 
+    }
+
+    // 4. Fungsi Render Utama (Presisi 1:1)
+    function render() {
+        if (!display || !input || !fSize) return;
+        
+        display.style.fontSize = fSize.value;
+        display.style.color = activeColor;
+        
+        const val = input.value.trim();
+        if (!val) {
+            display.innerHTML = "<span style='color:#94a3b8;'>...</span>";
+            return;
+        }
+        
+        // displayMode: false penting agar tidak ada margin tambahan di Word
+        katex.render(val, display, { throwOnError: false, displayMode: false });
+    }
+
+    // 5. Fungsi Manipulasi Teks
+    function insert(code) {
+        const start = input.selectionStart;
+        const end = input.selectionEnd;
+        input.value = input.value.slice(0, start) + code + input.value.slice(end);
+        input.focus();
+        // Mengatur kursor ke dalam kurung kurawal jika ada
+        const cursorOffset = code.indexOf('{}') !== -1 ? code.indexOf('{}') + 1 : code.length;
+        input.setSelectionRange(start + cursorOffset, start + cursorOffset);
+        render();
+    }
+
+    function clearAll() { 
+        if(confirm("Hapus seluruh ketikan?")) { 
+            input.value = ""; 
+            render(); 
+        } 
+    }
+
+    // 6. Fungsi Export (Copy & Download)
+    function copyLaTeX() { 
+     if(!input.value) return alert("Rumus kosong!");
+     navigator.clipboard.writeText(input.value); 
+     alert("Kode LaTeX disalin!"); 
+    }
+
+    // --- 1. FUNGSI PEMOTONG (WAJIB ADA) ---
+function trimCanvas(canvas) {
+    const ctx = canvas.getContext('2d');
+    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imgData.data;
+    let top = null, bottom = null, left = null, right = null;
+
+    for (let y = 0; y < canvas.height; y++) {
+        for (let x = 0; x < canvas.width; x++) {
+            const alpha = data[(y * canvas.width + x) * 4 + 3];
+            if (alpha > 0) { 
+                if (top === null) top = y;
+                bottom = y;
+                if (left === null || x < left) left = x;
+                if (right === null || x > right) right = x;
+            }
+        }
+    }
+
+    if (top === null) return canvas;
+
+    const trimmed = document.createElement('canvas');
+    trimmed.width = right - left + 1;
+    trimmed.height = bottom - top + 1;
+    trimmed.getContext('2d').putImageData(
+        ctx.getImageData(left, top, trimmed.width, trimmed.height), 0, 0
+    );
+    return trimmed;
+}
+
+// --- 2. FUNGSI SALIN UTAMA (VERSI TERBAIK) ---
+async function copyToClipboard() {
+    if (!input.value.trim()) return alert("Tulis rumus terlebih dahulu!");
+    
+    try {
+        // Capture resolusi tinggi agar tajam seperti hasil download
+        const canvas4x = await html2canvas(captureArea, { 
+            backgroundColor: null, 
+            scale: 4, 
+            logging: false, 
+            useCORS: true 
+        });
+
+        // Potong bagian kosong agar sejajar dengan teks di Word
+        const croppedCanvas = trimCanvas(canvas4x);
+
+        // Hitung ukuran display agar tidak raksasa di Word (Skala 1:1)
+        const displayWidth = croppedCanvas.width / 4;
+        const displayHeight = croppedCanvas.height / 4;
+
+        // Ubah ke format Data URL
+        const dataUrl = croppedCanvas.toDataURL("image/png");
+
+        // Bungkus dengan HTML agar Word otomatis mengatur ukurannya
+        const htmlString = `<img src="${dataUrl}" width="${displayWidth}" height="${displayHeight}">`;
+        const htmlBlob = new Blob([htmlString], { type: "text/html" });
+
+        // Backup format PNG biasa
+        croppedCanvas.toBlob(async (pngBlob) => {
+            try {
+                const item = new ClipboardItem({ 
+                    "text/html": htmlBlob,
+                    "image/png": pngBlob 
+                });
+                await navigator.clipboard.write([item]);
+                alert("Berhasil menyalin ke clipboard.");
+            } catch (err) {
+                alert("Gagal menyalin ke clipboard.");
+            }
+        }, "image/png", 1.0);
+        
+    } catch (err) { 
+        console.error(err);
+        alert("Gagal memproses gambar."); 
+    }
+}
+        
+
+    function downloadImage() {
+        if (!input.value.trim()) return;
+        // Scale 2 khusus download agar gambar tajam saat diprint
+        html2canvas(captureArea, { backgroundColor: null, scale: 4 }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'rumus-matematika.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+    }
+</script>
+</body>
+</html>
