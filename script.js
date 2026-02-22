@@ -270,7 +270,7 @@
         if (!input.value.trim()) return alert("Tulis rumus terlebih dahulu!");
 
         
-        const btn = document.querySelector('.btn-success'); // Ini kelas untuk tombol SALIN
+        const btn = document.querySelector('.btn-success'); 
         const originalText = btn.innerText;
         btn.innerText = "Memproses...";
 
@@ -389,6 +389,7 @@
         }
 
     }
+
 
 
 
