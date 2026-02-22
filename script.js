@@ -318,7 +318,7 @@
         if (!input.value.trim()) return;
         html2canvas(captureArea, { backgroundColor: null, scale: 4 }).then(canvas => {
             const link = document.createElement('a');
-            link.download = 'rumus-matematika.png';
+            link.download = 'rumus-matematika'+Date.now()+'.png';
             link.href = canvas.toDataURL();
             link.click();
         });
@@ -377,7 +377,8 @@
 
         } catch (err) {
             console.error(err);
-            alert("Gagal menyalin. Browser HP ini membatasi Clipboard API. Silakan gunakan tombol Simpan PNG.");
+            alert("Gagal menyalin.");
             btn.innerText = originalText;
         }
+
     }
