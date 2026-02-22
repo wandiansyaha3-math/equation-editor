@@ -318,7 +318,7 @@
         if (!input.value.trim()) return;
         html2canvas(captureArea, { backgroundColor: null, scale: 4 }).then(canvas => {
             const link = document.createElement('a');
-            link.download = 'rumus matematika_'+ Date.now() + '.png';
+            link.download = 'persamaan-mtk.png';
             link.href = canvas.toDataURL();
             link.click();
         });
@@ -382,4 +382,5 @@
         }
 
     }
+
 
