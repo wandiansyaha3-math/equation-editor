@@ -67,7 +67,7 @@
         }
 
         .header-logo {
-            height: 45px;          /* Atur tinggi logo sesuai selera */
+            height: 60px;          /* Atur tinggi logo sesuai selera */
             width: auto;           /* Lebar otomatis agar tidak gepeng */
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); /* Memberi efek bayangan halus pada logo */
         }
@@ -104,4 +104,5 @@
             .ribbon-label { font-size: 9px; }
             #latexInput { height: 65px; } /* Hanya mengecil di HP */
             .sub-item { min-width: 45px; height: 45px; } /* Grid menu lebih rapat di HP */
+
         }
