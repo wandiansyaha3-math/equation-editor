@@ -1,3 +1,10 @@
+/* * Editor Persamaan Matematika As-Syifa 
+ * Dibuat oleh: MGMP Matematika As-Syifa
+ * Library yang digunakan: 
+ * - KaTeX (MIT License)
+ * - html2canvas (MIT License)
+ */
+
 // ==========================================
     // 1. DATABASE MENU (Pusat Pengaturan Toolbar)
     // ==========================================
@@ -382,5 +389,6 @@
         }
 
     }
+
 
 
