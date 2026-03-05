@@ -331,65 +331,6 @@
         });
     }
 
-    
-    async function copyToCBT() {
-        if (!input.value.trim()) return alert("Tulis rumus terlebih dahulu!");
-       
-        const btn = document.querySelector('.btn-cbt');
-        const originalText = btn.innerText;
-        btn.innerText = "Memproses...";
-
-        try {
-            let sharedData = null;
-            
-            const processCanvas = async () => {
-                if (sharedData) return sharedData;
-                
-                const canvas4x = await html2canvas(captureArea, { backgroundColor: null, scale: 4, logging: false, useCORS: true });
-                const cropped = trimCanvas(canvas4x);
-                const targetWidth = Math.round(cropped.width / 4);
-                const targetHeight = Math.round(cropped.height / 4);
-                
-                const finalCanvas = document.createElement('canvas');
-                finalCanvas.width = targetWidth;
-                finalCanvas.height = targetHeight;
-                const ctx = finalCanvas.getContext('2d');
-                ctx.imageSmoothingEnabled = true;
-                ctx.imageSmoothingQuality = 'high';
-                ctx.drawImage(cropped, 0, 0, targetWidth, targetHeight);
-                
-                sharedData = { canvas: finalCanvas, w: targetWidth, h: targetHeight };
-                return sharedData;
-            };
-            
-            const pngPromise = processCanvas().then(data => {
-                return new Promise(resolve => data.canvas.toBlob(resolve, "image/png", 1.0));
-            });
-
-            const htmlPromise = processCanvas().then(data => {
-                const dataUrl = data.canvas.toDataURL("image/png");
-                const htmlString = `<img src="${dataUrl}" width="${data.w}" height="${data.h}" style="height:${data.h}px; width:auto; vertical-align:middle; display:inline-block; margin:0 2px;" alt="math">`;
-                return new Blob([htmlString], { type: "text/html" });
-            });
-            
-            const item = new ClipboardItem({
-                "text/html": htmlPromise,
-                "image/png": pngPromise
-            });
-            
-            await navigator.clipboard.write([item]);            
-            
-            btn.innerText = "Berhasil Disalin!";
-            setTimeout(() => { btn.innerText = originalText; }, 2000);
-
-        } catch (err) {
-            console.error(err);
-            alert("Gagal menyalin.");
-            btn.innerText = originalText;
-        }
-
-    }
-
 
 
 
